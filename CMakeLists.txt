@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11.3)
 
 # set(CMAKE_CXX_STANDARD 17)
 project(SAM_1.3_Actuarial_Valuation_Engine)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread")
 
 find_package(Boost 1.7 COMPONENTS date_time REQUIRED)
 

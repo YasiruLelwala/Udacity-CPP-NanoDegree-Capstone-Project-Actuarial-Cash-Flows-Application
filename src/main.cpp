@@ -46,7 +46,7 @@ std::vector<std::vector<std::string>> readPolicyData () {
 int main()
 {
 //-------------------------------------------------------------------------------------------------//
-    std::shared_ptr portfolioCashFlows = std::make_shared<PortfolioCashFlows>();
+    auto portfolioCashFlows = std::make_shared<PortfolioCashFlows>();
     std::vector<std::future<void>> futures;
 
     std::string dateOfValuation;
