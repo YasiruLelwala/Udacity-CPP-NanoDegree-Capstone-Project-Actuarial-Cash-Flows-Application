@@ -1,3 +1,0 @@
-/Users/yasirulelwala/Desktop/Cpp_Projects/Robust Insurance Technology/02. R&D/Udacity C++ Nanodegree/05. Capstone Project/Udacity Capstone Submission/build/CMakeFiles/rebuild_cache.dir
-/Users/yasirulelwala/Desktop/Cpp_Projects/Robust Insurance Technology/02. R&D/Udacity C++ Nanodegree/05. Capstone Project/Udacity Capstone Submission/build/CMakeFiles/edit_cache.dir
-/Users/yasirulelwala/Desktop/Cpp_Projects/Robust Insurance Technology/02. R&D/Udacity C++ Nanodegree/05. Capstone Project/Udacity Capstone Submission/build/CMakeFiles/goSAM.dir

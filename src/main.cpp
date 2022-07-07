@@ -66,13 +66,16 @@ int main()
         runType = RunType::Stress;
     };
 
-    // Valuation *valuation = new Valuation(from_simple_string(dateOfValuation), runType);
-    // MortalityRates *mortalityRates = new MortalityRates(*valuation);
-    // LapseRates *lapseRates = new LapseRates(*valuation);
+            std::cout << std::endl;
 
     std::shared_ptr<Valuation> valuation = std::make_shared<Valuation>(from_simple_string(dateOfValuation), runType);
-    std::shared_ptr<MortalityRates> mortalityRates = std::make_shared<MortalityRates>(*valuation);
+            std::cout << "Valuation object use count is " << valuation.use_count() << std::endl;
+    std::shared_ptr<MortalityRates> mortalityRates = std::make_shared<MortalityRates>(*valuation); // mortality rates object is constructed with a reference to a valuation object. 
+            std::cout << "Valuation object use count is " << valuation.use_count() << std::endl;
     std::shared_ptr<LapseRates> lapseRates = std::make_shared<LapseRates>(*valuation);
+            std::cout << "Valuation object use count is " << valuation.use_count() << std::endl;
+
+            std::cout << std::endl;
 
     std::vector<std::vector<std::string>> policyData = readPolicyData();
 //-------------------------------------------------------------------------------------------------//
@@ -82,9 +85,12 @@ int main()
 //-------------------------------------------------------------------------------------------------//
     // construct Policy objects and push into vector of Policy objects in the PortfolioCashFlows object using std::async
     std::for_each(policyData.begin(), policyData.end(), [&portfolioCashFlows, &valuation, &futures] (std::vector<std::string> &data) {
-        std::unique_ptr<Policy> = std::make_unique<Policy>(*valuation, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
-        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackPolicy, portfolioCashFlows, std::move(policy)));
+        std::shared_ptr<Policy> policy = std::make_shared<Policy>(*valuation, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
+        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackPolicy, portfolioCashFlows, std::move(policy))); // moving the shared pointer to a function. The use count will not increase. No destruction upon leaving current scope. 
     });
+
+            std::cout << std::endl; 
+
     // wait for threads to finish
     std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
         ftr.wait();
@@ -95,10 +101,13 @@ int main()
 
 //-------------------------------------------------------------------------------------------------//
     // construct TimeStepProjection objects and push into vector of TimeStepProjection objects in the PortfolioCashFlows object using std::async
-   std::for_each(portfolioCashFlows->getPolicyVector().begin(), portfolioCashFlows->getPolicyVector().end(), [&portfolioCashFlows,&futures] (std::unique_ptr<Policy> policy) {
-       std::unique_ptr<TimeStepProjection> timeStepProjection = std::make_unique<TimeStepProjection>(policy);
-       futures.emplace_back(std::async(&PortfolioCashFlows::pushBackTimeStepProjection, portfolioCashFlows, std::move(timeStepProjection)));
+   std::for_each(portfolioCashFlows->getPolicyVector().begin(), portfolioCashFlows->getPolicyVector().end(), [&portfolioCashFlows,&futures] (std::shared_ptr<Policy> policy) { // taking a shared pointer by value. This will create another shared pointer on the stack while pointing to the same object on heap memory. 
+       std::cout << "Policy object use count is " << policy.use_count() << std::endl;  // use count will now increase to 2.
+       std::shared_ptr<TimeStepProjection> timeStepProjection = std::make_shared<TimeStepProjection>(*policy.get()); // passing the object managed by the smart pointer. It is passed as a reference (check class definition). I am not simply derefernicing the pointer because the pointer could go out of scope before thread executes which would invalidate the pointer. 
+       futures.emplace_back(std::async(&PortfolioCashFlows::pushBackTimeStepProjection, portfolioCashFlows, std::move(timeStepProjection))); // moving the shared pointer to a function. The use count will not increase. No destruction upon leaving current scope. 
    } );
+
+        std::cout << std::endl;
 
    // wait for threads to finish
    std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -106,9 +115,13 @@ int main()
     });
 
     // invoke the run function on each element of the TimeStepProjection vector in the PortfolioCashFlows object
-    std::for_each(portfolioCashFlows->getTimeStepProjectionVector().begin(), portfolioCashFlows->getTimeStepProjectionVector().end(), [&futures] (TimeStepProjection &timeStepProjection) {
-        futures.emplace_back(std::async(&TimeStepProjection::run, std::ref(timeStepProjection)));
+    std::for_each(portfolioCashFlows->getTimeStepProjectionVector().begin(), portfolioCashFlows->getTimeStepProjectionVector().end(), [&futures] (std::shared_ptr<TimeStepProjection> timeStepProjection) {
+        std::cout << "TimeStepProjection object use count is " << timeStepProjection.use_count() << std::endl;  // use count will now increase to 2.
+        futures.emplace_back(std::async(&TimeStepProjection::run, std::ref(*timeStepProjection.get()))); // i am not passing a reference to timestepprojection pointer because while the thread is exectuing and the for loop finishes, the pointer would go out of scope. I dont want to pass the pointer by value to avoid creating of another pointer and unncessarily increase the use count. 
+        std::cout << "TimeStepProjection object use count is " << timeStepProjection.use_count() << std::endl;  // use count will remain at 2.
     });
+
+            std::cout << std::endl;
 
     // wait for threads to finish
      std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -120,10 +133,13 @@ int main()
 
 //-------------------------------------------------------------------------------------------------//
     // construct DecrementsProjection objects, and push into vector of DecrementsProjection objects in the PortfolioCashFlows object using std::async
-    std::for_each(portfolioCashFlows->getTimeStepProjectionVector().begin(), portfolioCashFlows->getTimeStepProjectionVector().end(), [&portfolioCashFlows, &futures, &mortalityRates, &lapseRates] (TimeStepProjection &timeStepProjection) {
-        std::unique_ptr<DecrementsProjection> decrementsProjection = std::make_unique<DecrementsProjection>(timeStepProjection, *mortalityRates, *lapseRates);
-        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackDecrementsProjection, portfolioCashFlows, std::move(decrementsProjection)));
+    std::for_each(portfolioCashFlows->getTimeStepProjectionVector().begin(), portfolioCashFlows->getTimeStepProjectionVector().end(), [&portfolioCashFlows, &futures, &mortalityRates, &lapseRates] (std::shared_ptr<TimeStepProjection> timeStepProjection) {
+        std::cout << "TimeStepProjection object use count is " << timeStepProjection.use_count() << std::endl;  // will increase to 2.
+        std::shared_ptr<DecrementsProjection> decrementsProjection = std::make_shared<DecrementsProjection>(*timeStepProjection.get(), *mortalityRates.get(), *lapseRates.get());
+        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackDecrementsProjection, portfolioCashFlows, std::move(decrementsProjection))); // moving the shared pointer to a function. The use count will not increase. No destruction upon leaving current scope. 
     });
+
+            std::cout << std::endl;
 
     // wait for threads to finish
      std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -131,9 +147,13 @@ int main()
     });
 
     // invoke the run function on each element of the DecrementsProjection vector in the PortfolioCashFlows object
-    std::for_each(portfolioCashFlows->getDecrementsProjectionVector().begin(), portfolioCashFlows->getDecrementsProjectionVector().end(), [&futures] (DecrementsProjection &decrementsProjection) {
-        futures.emplace_back(std::async(&DecrementsProjection::run, std::ref(decrementsProjection)));
+    std::for_each(portfolioCashFlows->getDecrementsProjectionVector().begin(), portfolioCashFlows->getDecrementsProjectionVector().end(), [&futures] (std::shared_ptr<DecrementsProjection> decrementsProjection) {
+        std::cout << "DecrementsProjection object use count is " << decrementsProjection.use_count() << std::endl;  // will increase to 2.
+        futures.emplace_back(std::async(&DecrementsProjection::run, std::ref(*decrementsProjection.get()))); // i am not passing a reference to timestepprojection pointer because while the thread is exectuing and the for loop finishes, the pointer would go out of scope. I dont want to pass the pointer by value to avoid creating of another pointer and unncessarily increase the use count. 
+        std::cout << "DecrementsProjection object use count is " << decrementsProjection.use_count() << std::endl;  // will remain at 2.
     });
+
+            std::cout << std::endl;
 
     // wait for threads to finish
      std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -145,10 +165,13 @@ int main()
 
 //-------------------------------------------------------------------------------------------------//
     // construct CashFlowsProjection objects, and push into vector of CashFlowsProjection objects in the PortfolioCashFlows object using std::async
-    std::for_each(portfolioCashFlows->getDecrementsProjectionVector().begin(), portfolioCashFlows->getDecrementsProjectionVector().end(), [&portfolioCashFlows,&futures] (DecrementsProjection &decrementsProjection) {
-        std::unique_ptr<CashFlowsProjection> cashFlowsProjection = std::make_unique<CashFlowsProjection>(decrementsProjection);
+    std::for_each(portfolioCashFlows->getDecrementsProjectionVector().begin(), portfolioCashFlows->getDecrementsProjectionVector().end(), [&portfolioCashFlows,&futures] (std::shared_ptr<DecrementsProjection> decrementsProjection) {
+        std::cout << "DecrementsProjection object use count is " << decrementsProjection.use_count() << std::endl;  // will increase to 2.
+        std::shared_ptr<CashFlowsProjection> cashFlowsProjection = std::make_shared<CashFlowsProjection>(*decrementsProjection.get());
         futures.emplace_back(std::async(&PortfolioCashFlows::pushBackCashFlowsProjection, portfolioCashFlows, std::move(cashFlowsProjection)));
     });
+
+            std::cout << std::endl;
 
     // wait for threads to finish
      std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -156,9 +179,13 @@ int main()
     });
 
     // invoke the run function on each element of the CashFlowsProjection vector in the PortfolioCashFlows object
-    std::for_each(portfolioCashFlows->getCashFlowsProjectionVector().begin(), portfolioCashFlows->getCashFlowsProjectionVector().end(), [&futures] (CashFlowsProjection &cashFlowsProjection) {
-        futures.emplace_back(std::async(&CashFlowsProjection::run, std::ref(cashFlowsProjection)));
+    std::for_each(portfolioCashFlows->getCashFlowsProjectionVector().begin(), portfolioCashFlows->getCashFlowsProjectionVector().end(), [&futures] (std::shared_ptr<CashFlowsProjection> cashFlowsProjection) {
+        std::cout << "CashFlowsProjection object use count is " << cashFlowsProjection.use_count() << std::endl;  // will increase to 2.
+        futures.emplace_back(std::async(&CashFlowsProjection::run, std::ref(*cashFlowsProjection.get())));
+        std::cout << "CashFlowsProjection object use count is " << cashFlowsProjection.use_count() << std::endl;  // will remain at 2.
     });
+
+            std::cout << std::endl;
 
     // wait for threads to finish
      std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -170,10 +197,13 @@ int main()
 
 //-------------------------------------------------------------------------------------------------//
     // construct CashFlowsProjectionByValuationYear objects, and push into vector of CashFlowsProjectionByValuationYear objects in the PortfolioCashFlows object using std::async
-    std::for_each(portfolioCashFlows->getCashFlowsProjectionVector().begin(), portfolioCashFlows->getCashFlowsProjectionVector().end(), [&portfolioCashFlows,&futures] (CashFlowsProjection &cashFlowsProjection) {
-        std::unique_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear = std::make_unique<CashFlowsProjectionByValuationYear>(cashFlowsProjection);
+    std::for_each(portfolioCashFlows->getCashFlowsProjectionVector().begin(), portfolioCashFlows->getCashFlowsProjectionVector().end(), [&portfolioCashFlows,&futures] (std::shared_ptr<CashFlowsProjection> cashFlowsProjection) {
+        std::cout << "CashFlowsProjection object use count is " << cashFlowsProjection.use_count() << std::endl;  // will increase to 2.
+        std::shared_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear = std::make_shared<CashFlowsProjectionByValuationYear>(*cashFlowsProjection.get());
         futures.emplace_back(std::async(&PortfolioCashFlows::pushBackCashFlowsProjectionByValuationYear, portfolioCashFlows, std::move(cashFlowsProjectionByValuationYear)));
     });
+
+            std::cout << std::endl;
 
     // wait for threads to finish
      std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -181,9 +211,12 @@ int main()
     });
 
     // invoke the run function on each element of the CashFlowsProjectionByValuationYear vector in the PortfolioCashFlows object
-    std::for_each(portfolioCashFlows->getCashFlowsProjectionByValuationYearVector().begin(), portfolioCashFlows->getCashFlowsProjectionByValuationYearVector().end(), [&futures] (CashFlowsProjectionByValuationYear &cashFlowsProjectionByValuationYear) {
-        futures.emplace_back(std::async(&CashFlowsProjectionByValuationYear::run, std::ref(cashFlowsProjectionByValuationYear)));
+    std::for_each(portfolioCashFlows->getCashFlowsProjectionByValuationYearVector().begin(), portfolioCashFlows->getCashFlowsProjectionByValuationYearVector().end(), [&futures] (std::shared_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear) {
+        std::cout << "CashFlowsProjectionByValuationYear object use count is " << cashFlowsProjectionByValuationYear.use_count() << std::endl;  // will increase to 2.
+        futures.emplace_back(std::async(&CashFlowsProjectionByValuationYear::run, std::ref(*cashFlowsProjectionByValuationYear.get())));
     });
+
+            std::cout << std::endl;
 
     // wait for threads to finish
      std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {

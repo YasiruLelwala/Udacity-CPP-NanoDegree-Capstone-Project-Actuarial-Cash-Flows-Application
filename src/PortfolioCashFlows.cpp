@@ -30,7 +30,7 @@ void PortfolioCashFlows::run()
     PortfolioCashFlows::printPortfolioCashFlows();
 }
 
-void PortfolioCashFlows::pushBackPolicy(std::unique_ptr<Policy> policy) 
+void PortfolioCashFlows::pushBackPolicy(std::shared_ptr<Policy> policy) 
 {
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
@@ -41,7 +41,7 @@ void PortfolioCashFlows::pushBackPolicy(std::unique_ptr<Policy> policy)
     //_cond.notify_one(); // notify client after pushing new Object A into vector
 };
 
-void PortfolioCashFlows::pushBackTimeStepProjection(std::unique_ptr<TimeStepProjection> timeStepProjection)
+void PortfolioCashFlows::pushBackTimeStepProjection(std::shared_ptr<TimeStepProjection> timeStepProjection)
 {
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
@@ -52,7 +52,7 @@ void PortfolioCashFlows::pushBackTimeStepProjection(std::unique_ptr<TimeStepProj
     //_cond.notify_one(); // notify client after pushing new Object A into vector
 }
 
-void PortfolioCashFlows::pushBackDecrementsProjection(std::unique_ptr<DecrementsProjection> decrementsProjection)
+void PortfolioCashFlows::pushBackDecrementsProjection(std::shared_ptr<DecrementsProjection> decrementsProjection)
 {
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
@@ -63,7 +63,7 @@ void PortfolioCashFlows::pushBackDecrementsProjection(std::unique_ptr<Decrements
     //_cond.notify_one(); // notify client after pushing new Object A into vector
 }
 
-void PortfolioCashFlows::pushBackCashFlowsProjection (std::unique_ptr<CashFlowsProjection> cashFlowsProjection)
+void PortfolioCashFlows::pushBackCashFlowsProjection (std::shared_ptr<CashFlowsProjection> cashFlowsProjection)
 {
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
@@ -73,7 +73,7 @@ void PortfolioCashFlows::pushBackCashFlowsProjection (std::unique_ptr<CashFlowsP
     _cashFlowsProjectionVector.emplace_back(std::move(cashFlowsProjection));
 }
 
-void PortfolioCashFlows::pushBackCashFlowsProjectionByValuationYear (std::unique_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear)
+void PortfolioCashFlows::pushBackCashFlowsProjectionByValuationYear (std::shared_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear)
 {
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
