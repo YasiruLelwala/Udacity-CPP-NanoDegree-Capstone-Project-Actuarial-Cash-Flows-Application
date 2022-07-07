@@ -23,6 +23,9 @@ public:
     // constructor
     LapseRates(Valuation &valuation);
 
+    // destructor
+    ~LapseRates() { std::cout << "LapseRates object destructed" << std::endl; };
+
     // getters
     const std::unordered_map<int, std::vector<double>> &getBaseLapseRatesHashTableYearly() { return _baseLapseRatesYearlyHashTable; };
     const std::unordered_map<int, std::vector<double>> &getLoadedLapseRatesHashTableMonthly() { return _loadedLapseRatesMonthlyHashTable; };

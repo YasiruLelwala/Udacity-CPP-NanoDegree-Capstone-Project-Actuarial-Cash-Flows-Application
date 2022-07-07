@@ -14,14 +14,17 @@ class PortfolioCashFlows
 {
 public:
     // constructor
-    PortfolioCashFlows() {};
+    PortfolioCashFlows() {std::cout << "PortfoliosCashFlows object constructed" << std::endl; };
+
+    ~PortfolioCashFlows() { std::cout << "PortfoliosCashFlows object destructed" << std::endl; };
 
     // getters
-    std::vector<Policy> &getPolicyVector() { return _policyVector; };
-    std::vector<TimeStepProjection> &getTimeStepProjectionVector() { return _timeStepProjectionVector; };
-    std::vector<DecrementsProjection> &getDecrementsProjectionVector() { return _decrementsProjectionVector; };
-    std::vector<CashFlowsProjection> &getCashFlowsProjectionVector() { return _cashFlowsProjectionVector; };
-    std::vector<CashFlowsProjectionByValuationYear> &getCashFlowsProjectionByValuationYearVector() { return _cashFlowsProjectionByValuationYearVector; };
+    std::vector<std::unique_ptr<Policy>> &getPolicyVector() { return _policyVector; };
+    std::vector<std::unique_ptr<TimeStepProjection>> &getTimeStepProjectionVector() { return _timeStepProjectionVector; };
+    std::vector<std::unique_ptr<DecrementsProjection>> &getDecrementsProjectionVector() { return _decrementsProjectionVector; };
+    std::vector<std::unique_ptr<CashFlowsProjection>> &getCashFlowsProjectionVector() { return _cashFlowsProjectionVector; };
+    std::vector<std::unique_ptr<CashFlowsProjectionByValuationYear>> &getCashFlowsProjectionByValuationYearVector() { return _cashFlowsProjectionByValuationYearVector; };
+    
     std::map<int,std::vector<double>> &getPortfolioCashFlowsByValuationYear() {return _portfolioCashFlowsByValuationYear; };
 
     // print methods
@@ -31,11 +34,11 @@ public:
     void run();
 
 
-    void pushBackPolicy(Policy &&policy);
-    void pushBackTimeStepProjection(TimeStepProjection &&timeStepProjection);
-    void pushBackDecrementsProjection(DecrementsProjection &&decrementsProjection);
-    void pushBackCashFlowsProjection (CashFlowsProjection &&cashFlowsProjection);
-    void pushBackCashFlowsProjectionByValuationYear (CashFlowsProjectionByValuationYear &&cashFlowsProjectionByValuationYear);
+    void pushBackPolicy(std::unique_ptr<Policy> policy);
+    void pushBackTimeStepProjection(std::unique_ptr<TimeStepProjection> timeStepProjection);
+    void pushBackDecrementsProjection(std::unique_ptr<DecrementsProjection> decrementsProjection);
+    void pushBackCashFlowsProjection (std::unique_ptr<CashFlowsProjection> cashFlowsProjection);
+    void pushBackCashFlowsProjectionByValuationYear (std::unique_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear);
 
     std::map<int,std::vector<double>> createPortfolioCashFlowsByValuationYear();
 
@@ -45,13 +48,15 @@ public:
 private:
     std::mutex _mutex;
     
-    std::vector<Policy> _policyVector;
-    std::vector<TimeStepProjection> _timeStepProjectionVector;
-    std::vector<DecrementsProjection> _decrementsProjectionVector;
-    std::vector<CashFlowsProjection> _cashFlowsProjectionVector;
-    std::vector<CashFlowsProjectionByValuationYear> _cashFlowsProjectionByValuationYearVector;
+    std::vector<std::unique_ptr<Policy>> _policyVector;
+    std::vector<std::unique_ptr<TimeStepProjection>> _timeStepProjectionVector;
+    std::vector<std::unique_ptr<DecrementsProjection>> _decrementsProjectionVector;
+    std::vector<std::unique_ptr<CashFlowsProjection>> _cashFlowsProjectionVector;
+    std::vector<std::unique_ptr<CashFlowsProjectionByValuationYear>> _cashFlowsProjectionByValuationYearVector;
 
     std::map<int,std::vector<double>> _portfolioCashFlowsByValuationYear;
+
+    
 };
 
 #endif

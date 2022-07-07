@@ -25,6 +25,8 @@ public:
     // constructor
     Valuation(date dateOfValuation, RunType runType);
 
+    ~Valuation() { std::cout << "Valuation object destructed" << std::endl; };
+
     // getters
     const date &getDateOfValuation() { return _dateOfValuation; };
     const RunType &getRunType() { return _runType; };

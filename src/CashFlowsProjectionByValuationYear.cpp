@@ -1,7 +1,10 @@
 #include "CashFlowsProjectionByValuationYear.h"
 
 // constructor
-CashFlowsProjectionByValuationYear::CashFlowsProjectionByValuationYear(CashFlowsProjection &CashFlowsProjection) : _cashFlowsProjection(CashFlowsProjection) {}
+CashFlowsProjectionByValuationYear::CashFlowsProjectionByValuationYear(CashFlowsProjection &CashFlowsProjection) : _cashFlowsProjection(CashFlowsProjection) 
+{
+    std::cout << "CashFlowsProjectionByValuationYear object with id = " << this->getCashFlowsProjection().getDecrementsProjection().getTimeStepProjection().getPolicy().getID() << " constructed" << std::endl;
+}
 
 // methods
 void CashFlowsProjectionByValuationYear::run()

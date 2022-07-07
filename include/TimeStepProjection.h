@@ -17,6 +17,9 @@ public:
     // constructor
     TimeStepProjection(Policy &policy);
 
+    // destructor
+    ~TimeStepProjection() { std::cout << "TimeStepProjection object with id = " << this->getPolicy().getID() << " destructed" << std::endl; };
+
     // methods
     void run();
 

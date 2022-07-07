@@ -6,7 +6,9 @@ _valuation(valuation),
 _baseMortalityRatesYearlyHashTable(createBaseMortalityRatesHashTableYearly()),
 _applicableLoadingOnBaseMortalityRatesYearly(0.95), 
 _loadedMortalityRatesMonthlyHashTable(createLoadedMortalityRatesHashTableMonthly()) 
-{}
+{
+    std::cout << "MortalityRates object constructed" << std::endl;
+};
 
 // setters
 std::unordered_map<int, std::vector<double>> MortalityRates::createBaseMortalityRatesHashTableYearly() 

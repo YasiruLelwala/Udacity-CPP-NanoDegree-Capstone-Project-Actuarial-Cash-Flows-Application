@@ -14,6 +14,9 @@ public:
     // constructor
     CashFlowsProjectionByValuationYear(CashFlowsProjection &cashFlowsProjection);
 
+    // destructor
+    ~CashFlowsProjectionByValuationYear() { std::cout << "CashFlowsProjectionByValuationYear object with id = " << this->getCashFlowsProjection().getDecrementsProjection().getTimeStepProjection().getPolicy().getID() << " destructed" << std::endl; };
+
     // methods
     void run();
 

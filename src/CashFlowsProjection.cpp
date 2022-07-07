@@ -1,7 +1,10 @@
 #include "CashFlowsProjection.h"
 
 // constructor
-CashFlowsProjection::CashFlowsProjection(DecrementsProjection &decrementsProjection) : _decrementsProjection(decrementsProjection) {}
+CashFlowsProjection::CashFlowsProjection(DecrementsProjection &decrementsProjection) : _decrementsProjection(decrementsProjection) 
+{
+    std::cout << "CashFlowsProjection object with id = " << this->getDecrementsProjection().getTimeStepProjection().getPolicy().getID() << " constructed" << std::endl;
+}
 
 // methods
 void CashFlowsProjection::run()

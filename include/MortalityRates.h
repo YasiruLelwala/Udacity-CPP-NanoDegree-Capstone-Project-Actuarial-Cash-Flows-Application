@@ -23,6 +23,9 @@ public:
     // constructor
     MortalityRates(Valuation &valuation);
 
+    // destructor
+    ~MortalityRates() { std::cout << "MortalityRates object destructed" << std::endl; };
+
     // getters
     const std::unordered_map<int, std::vector<double>> &getBaseMortalityRatesHashTableYearly() { return _baseMortalityRatesYearlyHashTable; };
     const std::unordered_map<int, std::vector<double>> &getLoadedMortalityRatesHashTableMonthly() { return _loadedMortalityRatesMonthlyHashTable; };

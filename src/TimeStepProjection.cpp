@@ -1,7 +1,10 @@
 #include "TimeStepProjection.h"
 
 // constructor
-TimeStepProjection::TimeStepProjection(Policy &policy) : _policy(policy) {};
+TimeStepProjection::TimeStepProjection(Policy &policy) : _policy(policy) 
+{
+    std::cout << "TimeStepProjection object with id = " << this->getPolicy().getID() << " constructed" << std::endl;
+};
 
 // methods
 void TimeStepProjection::run()

@@ -20,7 +20,9 @@ private:
 class B
 {
 public:
+    B(std::unique_ptr<A> a) : _objectOfClassA(std::move(a)) {};
 private:
+    std::unique_ptr<A> _objectOfClassA;
     
 };
 
@@ -29,15 +31,13 @@ class HoldingClass
 public:
     HoldingClass() {std::cout << "HoldingClass created" << std::endl; };
 
-    void pushBackA(std::unique_ptr<A> a)
+    void pushBackA(std::unique_ptr<A> a) // this function takes ownership of smart pointer and underlying object and then transfers this ownership to the holding class.
     {
-        _objectsOfClassA.emplace_back(std::move(a));
+        _objectsOfClassA.emplace_back(std::move(a)); 
     }
 
     void printSizeA() 
 	{ 
-		//std::lock_guard<std::mutex> uLock(_mutex);
-
 		std::cout << "Number of A objects = " << _objectsOfClassA.size() << std::endl; 
 	};
 
@@ -52,7 +52,7 @@ int main()
     for (int i = 0; i < 2; i++)
     {
         std::unique_ptr<A> a = std::make_unique<A>(i);
-        holdingClass->pushBackA(std::move(a));
+        holdingClass->pushBackA(std::move(a)); // ownership of a is transferred to the function which then transfers it to the holding class
 
     }
 

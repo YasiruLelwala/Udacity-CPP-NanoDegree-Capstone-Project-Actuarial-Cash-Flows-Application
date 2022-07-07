@@ -36,6 +36,7 @@ Policy::Policy
 
 {
     _id = idCnt++;
+    std::cout << "Policy object with id = " << _id << " constructed" << std::endl; 
 }
 
 // print methods

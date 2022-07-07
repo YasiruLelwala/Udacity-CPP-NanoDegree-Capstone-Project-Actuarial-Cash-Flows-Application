@@ -30,72 +30,57 @@ void PortfolioCashFlows::run()
     PortfolioCashFlows::printPortfolioCashFlows();
 }
 
-void PortfolioCashFlows::pushBackPolicy(Policy &&policy) 
+void PortfolioCashFlows::pushBackPolicy(std::unique_ptr<Policy> policy) 
 {
-    // simulate some work
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
 
     // add vector to queue
     //std::cout << "Policy #" << policy.getID() << " will be added to the queue" << std::endl;
-    _policyVector.push_back(std::move(policy));
+    _policyVector.emplace_back(std::move(policy));
     //_cond.notify_one(); // notify client after pushing new Object A into vector
 };
 
-void PortfolioCashFlows::pushBackTimeStepProjection(TimeStepProjection &&timeStepProjection)
+void PortfolioCashFlows::pushBackTimeStepProjection(std::unique_ptr<TimeStepProjection> timeStepProjection)
 {
-    // simulate some work
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
 
     // add vector to queue
     //std::cout << "TimeStep Projection #" << timeStepProjection.getPolicy().getID() << " will be added to the queue" << std::endl;
-    _timeStepProjectionVector.push_back(std::move(timeStepProjection));
+    _timeStepProjectionVector.emplace_back(std::move(timeStepProjection));
     //_cond.notify_one(); // notify client after pushing new Object A into vector
 }
 
-void PortfolioCashFlows::pushBackDecrementsProjection(DecrementsProjection &&decrementsProjection)
+void PortfolioCashFlows::pushBackDecrementsProjection(std::unique_ptr<DecrementsProjection> decrementsProjection)
 {
-    // simulate some work
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
 
     // add vector to queue
     //std::cout << "Decrements Projection #" << decrementsProjection.getTimeStepProjection().getPolicy().getID() << " will be added to the queue" << std::endl;
-    _decrementsProjectionVector.push_back(std::move(decrementsProjection));
+    _decrementsProjectionVector.emplace_back(std::move(decrementsProjection));
     //_cond.notify_one(); // notify client after pushing new Object A into vector
 }
 
-void PortfolioCashFlows::pushBackCashFlowsProjection (CashFlowsProjection &&cashFlowsProjection)
+void PortfolioCashFlows::pushBackCashFlowsProjection (std::unique_ptr<CashFlowsProjection> cashFlowsProjection)
 {
-    // simulate some work
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
 
     // add vector to queue
     //std::cout << "CashFlows Projection #" << cashFlowsProjection.getDecrementsProjection().getTimeStepProjection().getPolicy().getID() << " will be added to the queue" << std::endl;
-    _cashFlowsProjectionVector.push_back(std::move(cashFlowsProjection));
+    _cashFlowsProjectionVector.emplace_back(std::move(cashFlowsProjection));
 }
 
-void PortfolioCashFlows::pushBackCashFlowsProjectionByValuationYear (CashFlowsProjectionByValuationYear &&cashFlowsProjectionByValuationYear)
+void PortfolioCashFlows::pushBackCashFlowsProjectionByValuationYear (std::unique_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear)
 {
-    // simulate some work
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
 
     // add vector to queue
     //std::cout << "CashFlows Projection By Valuation Year #" << cashFlowsProjectionByValuationYear.getCashFlowsProjection().getDecrementsProjection().getTimeStepProjection().getPolicy().getID() << " will be added to the queue" << std::endl;
-    _cashFlowsProjectionByValuationYearVector.push_back(std::move(cashFlowsProjectionByValuationYear));
+    _cashFlowsProjectionByValuationYearVector.emplace_back(std::move(cashFlowsProjectionByValuationYear));
 }
 
 std::map<int,std::vector<double>> PortfolioCashFlows::createPortfolioCashFlowsByValuationYear()
@@ -116,7 +101,7 @@ std::map<int,std::vector<double>> PortfolioCashFlows::createPortfolioCashFlowsBy
 
     for (int i = 0; i < _cashFlowsProjectionByValuationYearVector.size(); i++)
     {
-        std::for_each(_cashFlowsProjectionByValuationYearVector[i].getCashFlowsByValuationYear().begin(), _cashFlowsProjectionByValuationYearVector[i].getCashFlowsByValuationYear().end(), [&portfolioCashFlowsByValuationYear, &your_sum] (auto &j) {
+        std::for_each(_cashFlowsProjectionByValuationYearVector[i]->getCashFlowsByValuationYear().begin(), _cashFlowsProjectionByValuationYearVector[i]->getCashFlowsByValuationYear().end(), [&portfolioCashFlowsByValuationYear, &your_sum] (auto &j) {
 
             if ( portfolioCashFlowsByValuationYear.count(j.first) > 0)
             {

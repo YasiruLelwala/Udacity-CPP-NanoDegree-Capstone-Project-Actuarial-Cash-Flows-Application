@@ -66,9 +66,13 @@ int main()
         runType = RunType::Stress;
     };
 
-    Valuation *valuation = new Valuation(from_simple_string(dateOfValuation), runType);
-    MortalityRates *mortalityRates = new MortalityRates(*valuation);
-    LapseRates *lapseRates = new LapseRates(*valuation);
+    // Valuation *valuation = new Valuation(from_simple_string(dateOfValuation), runType);
+    // MortalityRates *mortalityRates = new MortalityRates(*valuation);
+    // LapseRates *lapseRates = new LapseRates(*valuation);
+
+    std::shared_ptr<Valuation> valuation = std::make_shared<Valuation>(from_simple_string(dateOfValuation), runType);
+    std::shared_ptr<MortalityRates> mortalityRates = std::make_shared<MortalityRates>(*valuation);
+    std::shared_ptr<LapseRates> lapseRates = std::make_shared<LapseRates>(*valuation);
 
     std::vector<std::vector<std::string>> policyData = readPolicyData();
 //-------------------------------------------------------------------------------------------------//
@@ -78,9 +82,8 @@ int main()
 //-------------------------------------------------------------------------------------------------//
     // construct Policy objects and push into vector of Policy objects in the PortfolioCashFlows object using std::async
     std::for_each(policyData.begin(), policyData.end(), [&portfolioCashFlows, &valuation, &futures] (std::vector<std::string> &data) {
-        
-        Policy *policy = new Policy(*valuation, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
-        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackPolicy, portfolioCashFlows, std::move(*policy)));
+        std::unique_ptr<Policy> = std::make_unique<Policy>(*valuation, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
+        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackPolicy, portfolioCashFlows, std::move(policy)));
     });
     // wait for threads to finish
     std::for_each(futures.begin(), futures.end(), [] (auto &ftr) {
@@ -92,10 +95,9 @@ int main()
 
 //-------------------------------------------------------------------------------------------------//
     // construct TimeStepProjection objects and push into vector of TimeStepProjection objects in the PortfolioCashFlows object using std::async
-   std::for_each(portfolioCashFlows->getPolicyVector().begin(), portfolioCashFlows->getPolicyVector().end(), [&portfolioCashFlows,&futures] (Policy &policy) {
-
-       TimeStepProjection *timeStepProjection = new TimeStepProjection(policy);
-       futures.emplace_back(std::async(&PortfolioCashFlows::pushBackTimeStepProjection, portfolioCashFlows, std::move(*timeStepProjection)));
+   std::for_each(portfolioCashFlows->getPolicyVector().begin(), portfolioCashFlows->getPolicyVector().end(), [&portfolioCashFlows,&futures] (std::unique_ptr<Policy> policy) {
+       std::unique_ptr<TimeStepProjection> timeStepProjection = std::make_unique<TimeStepProjection>(policy);
+       futures.emplace_back(std::async(&PortfolioCashFlows::pushBackTimeStepProjection, portfolioCashFlows, std::move(timeStepProjection)));
    } );
 
    // wait for threads to finish
@@ -119,8 +121,8 @@ int main()
 //-------------------------------------------------------------------------------------------------//
     // construct DecrementsProjection objects, and push into vector of DecrementsProjection objects in the PortfolioCashFlows object using std::async
     std::for_each(portfolioCashFlows->getTimeStepProjectionVector().begin(), portfolioCashFlows->getTimeStepProjectionVector().end(), [&portfolioCashFlows, &futures, &mortalityRates, &lapseRates] (TimeStepProjection &timeStepProjection) {
-        DecrementsProjection *decrementsProjection = new DecrementsProjection(timeStepProjection, *mortalityRates, *lapseRates);
-        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackDecrementsProjection, portfolioCashFlows, std::move(*decrementsProjection)));
+        std::unique_ptr<DecrementsProjection> decrementsProjection = std::make_unique<DecrementsProjection>(timeStepProjection, *mortalityRates, *lapseRates);
+        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackDecrementsProjection, portfolioCashFlows, std::move(decrementsProjection)));
     });
 
     // wait for threads to finish
@@ -144,8 +146,8 @@ int main()
 //-------------------------------------------------------------------------------------------------//
     // construct CashFlowsProjection objects, and push into vector of CashFlowsProjection objects in the PortfolioCashFlows object using std::async
     std::for_each(portfolioCashFlows->getDecrementsProjectionVector().begin(), portfolioCashFlows->getDecrementsProjectionVector().end(), [&portfolioCashFlows,&futures] (DecrementsProjection &decrementsProjection) {
-        CashFlowsProjection *cashFlowsProjection = new CashFlowsProjection(decrementsProjection);
-        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackCashFlowsProjection, portfolioCashFlows, std::move(*cashFlowsProjection)));
+        std::unique_ptr<CashFlowsProjection> cashFlowsProjection = std::make_unique<CashFlowsProjection>(decrementsProjection);
+        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackCashFlowsProjection, portfolioCashFlows, std::move(cashFlowsProjection)));
     });
 
     // wait for threads to finish
@@ -169,8 +171,8 @@ int main()
 //-------------------------------------------------------------------------------------------------//
     // construct CashFlowsProjectionByValuationYear objects, and push into vector of CashFlowsProjectionByValuationYear objects in the PortfolioCashFlows object using std::async
     std::for_each(portfolioCashFlows->getCashFlowsProjectionVector().begin(), portfolioCashFlows->getCashFlowsProjectionVector().end(), [&portfolioCashFlows,&futures] (CashFlowsProjection &cashFlowsProjection) {
-        CashFlowsProjectionByValuationYear *cashFlowsProjectionByValuationYear = new CashFlowsProjectionByValuationYear(cashFlowsProjection);
-        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackCashFlowsProjectionByValuationYear, portfolioCashFlows, std::move(*cashFlowsProjectionByValuationYear)));
+        std::unique_ptr<CashFlowsProjectionByValuationYear> cashFlowsProjectionByValuationYear = std::make_unique<CashFlowsProjectionByValuationYear>(cashFlowsProjection);
+        futures.emplace_back(std::async(&PortfolioCashFlows::pushBackCashFlowsProjectionByValuationYear, portfolioCashFlows, std::move(cashFlowsProjectionByValuationYear)));
     });
 
     // wait for threads to finish

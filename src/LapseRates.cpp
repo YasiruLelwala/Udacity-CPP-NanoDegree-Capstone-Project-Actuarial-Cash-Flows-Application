@@ -6,7 +6,9 @@ _valuation(valuation),
 _baseLapseRatesYearlyHashTable(createBaseLapseRatesHashTableYearly()), 
 _applicableLoadingOnBaseLapseRatesYearly(0.95),
 _loadedLapseRatesMonthlyHashTable(createLoadedLapseRatesHashTableMonthly()) 
-{}
+{
+    std::cout << "LapseRates object constructed" << std::endl;
+}
 
 // setters
 std::unordered_map<int, std::vector<double>> LapseRates::createBaseLapseRatesHashTableYearly() 

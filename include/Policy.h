@@ -36,6 +36,9 @@ public:
         std::string premium 
     );
 
+    // destructor
+    ~Policy() { std::cout << "Policy object with id = " << _id << " destructed" << std::endl; };
+
     // print methods
     void printPolicyAttributes();
 

@@ -17,6 +17,8 @@ public:
     // constructor
     DecrementsProjection(TimeStepProjection &timeStepProjection, MortalityRates &mortalityRates, LapseRates &lapseRates);
 
+    // destructor
+    ~DecrementsProjection() { std::cout << "DecrementsProjection object with id = " << this->getTimeStepProjection().getPolicy().getID() << " destructed" << std::endl; }
     // methods
     void run();
 

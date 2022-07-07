@@ -1,7 +1,10 @@
 #include "DecrementsProjection.h"
 
 // constructor
-DecrementsProjection::DecrementsProjection(TimeStepProjection &timeStepProjection, MortalityRates &mortalityRates, LapseRates &lapseRates) :_timeStepProjection(timeStepProjection), _mortalityRates(mortalityRates), _lapseRates(lapseRates) {};
+DecrementsProjection::DecrementsProjection(TimeStepProjection &timeStepProjection, MortalityRates &mortalityRates, LapseRates &lapseRates) :_timeStepProjection(timeStepProjection), _mortalityRates(mortalityRates), _lapseRates(lapseRates) 
+{
+    std::cout << "DecrementsProjection object with id = " << this->getTimeStepProjection().getPolicy().getID() << " destructed" << std::endl;
+};
 
 
 // methods
