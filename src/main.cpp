@@ -49,6 +49,7 @@ int main()
     auto portfolioCashFlows = std::make_shared<PortfolioCashFlows>();
     std::vector<std::future<void>> futures;
 
+    // Setting of parameters
     std::string dateOfValuation;
     std::cout << "Enter Date of Valuation (YYYY-MM-DD)" << std::endl;
     std::cin >> dateOfValuation; 
